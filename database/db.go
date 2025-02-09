@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+	"main/database/dto"
 	"main/models"
 
 	"github.com/jmoiron/sqlx"
@@ -19,8 +21,25 @@ func (db *Database) CreateUser(user *models.UserData) error{
 	return err; 
 }
 
-func (db *Database) GetUser(params int) (*models.UserData, error){
-	var user models.UserData
+func (db *Database) GetUserWithId(params int) (*dto.UserGetDto, error){
+	var user dto.UserGetDto
 	err := db.db.Get(&user, `SELECT user_id, login FROM "User" WHERE user_id = $1`, params);
 	return &user, err; 
+}
+
+func (db *Database) GetUsers() (*[]dto.UserGetDto, error){
+	users := []dto.UserGetDto{}
+	err := db.db.Select(&users, `SELECT user_id, login FROM "User"`);
+	fmt.Println(users[0].Login);
+	return &users, err; 
+}
+
+func (db *Database) PutUser(userParams models.UserData) error{
+	_, err := db.db.Exec(`UPDATE "User" SET login = $1, password = $2 WHERE user_id = $3`, userParams.Login, userParams.Password, userParams.User_id);
+	return err; 
+}
+
+func (db *Database) DeleteUser(param int) error{
+	_, err := db.db.Exec(`DELETE FROM "User" WHERE user_id = $1`, param);
+	return err; 
 }

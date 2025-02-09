@@ -14,7 +14,6 @@ func CreateConnectionString() string {
         log.Fatalf("Error loading .env file: %v", err)
     }
 
-
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
@@ -22,8 +21,7 @@ func CreateConnectionString() string {
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", dbUser, dbPassword, dbName, dbSSLMode)
 
-	fmt.Println(connStr)
-
 	return  connStr;
 	
 }
+

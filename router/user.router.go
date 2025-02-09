@@ -8,10 +8,10 @@ import (
 )
 
 func SetupRoutes(api fiber.Router, db *database.Database){
-	userController := controller.NewUserController(db);
-	api.Get("/", userController.GetUser)
-	api.Post("/", userController.PostUser)
-	api.Get("/:id", userController.GetUserWithId)
-	api.Put("/:id", userController.PutUser)
-	api.Delete("/:id", userController.DeleteUser)
+	userHandler := controller.UserHandler(db);
+	api.Get("/", userHandler.GetUsers)
+	api.Post("/", userHandler.PostUser)
+	api.Get("/:id", userHandler.GetUserWithId)
+	api.Put("/", userHandler.PutUser)
+	api.Delete("/:id", userHandler.DeleteUser)
 }
