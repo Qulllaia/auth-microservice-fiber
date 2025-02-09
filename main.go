@@ -22,6 +22,7 @@ func main() {
 	_database := database.InitDatabse(db);
 
 	app := fiber.New()
-	router.SetupRoutes(app,_database)
+	router.SetupAuthRoutes(app, _database)
+	router.SetupUserRoutes(app,_database)
 	app.Listen(":3000")
 }

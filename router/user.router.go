@@ -3,15 +3,16 @@ package router
 import (
 	"main/controller"
 	"main/database"
+	"main/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(api fiber.Router, db *database.Database){
+func SetupUserRoutes(api fiber.Router, db *database.Database){
 	userHandler := controller.UserHandler(db);
-	api.Get("/", userHandler.GetUsers)
-	api.Post("/", userHandler.PostUser)
-	api.Get("/:id", userHandler.GetUserWithId)
-	api.Put("/", userHandler.PutUser)
-	api.Delete("/:id", userHandler.DeleteUser)
+	api.Get("/",  middleware.AuthMiddleware, userHandler.GetUsers)
+	api.Post("/", middleware.AuthMiddleware, userHandler.PostUser)
+	api.Get("/:id", middleware.AuthMiddleware, userHandler.GetUserWithId)
+	api.Put("/", middleware.AuthMiddleware, userHandler.PutUser)
+	api.Delete("/:id", middleware.AuthMiddleware, userHandler.DeleteUser)
 }

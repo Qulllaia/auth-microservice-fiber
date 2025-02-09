@@ -43,3 +43,16 @@ func (db *Database) DeleteUser(param int) error{
 	_, err := db.db.Exec(`DELETE FROM "User" WHERE user_id = $1`, param);
 	return err; 
 }
+
+func (db *Database) LoginUser(loginParams dto.UserLoginDto) (bool, error){
+
+	var result bool = true;
+
+	err := db.db.Get(&loginParams, `SELECT login, password FROM "User" WHERE login=$1 AND password=$2`, loginParams.Login, loginParams.Password)
+
+	if (dto.UserLoginDto{}) == loginParams{
+		result = false
+	}
+
+	return result, err
+}
