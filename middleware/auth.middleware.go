@@ -1,15 +1,20 @@
 package middleware
 
 import (
+	"os"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("secret-key");
+var jwtKey = []byte(os.Getenv("SECRET_TOKEN"));
 
 func AuthMiddleware(c *fiber.Ctx) error{
 
-	tokenString := c.Get("Authorization");
+	tokenString := strings.TrimSpace(
+		strings.TrimPrefix(
+			c.Get("Authorization"), "Bearer"));
 
 	if tokenString == ""{
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

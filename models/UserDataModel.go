@@ -1,7 +1,7 @@
 package models
 
 type UserData struct {
-	User_id  int    `db:"user_id" json:"user_id"`
-	Login    string `db:"login" json:"login"`
+	ID       int    `db:"id" json:"id"`
+	Email    string `db:"email" json:"email"`
 	Password string `db:"password" json:"password"`
 }

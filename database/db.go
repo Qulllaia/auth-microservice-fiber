@@ -1,9 +1,9 @@
 package database
 
 import (
-	"fmt"
 	"main/database/dto"
 	"main/models"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -17,40 +17,43 @@ func InitDatabse(db *sqlx.DB) *Database{
 }
 
 func (db *Database) CreateUser(user *models.UserData) error{
-	_, err := db.db.Exec(`INSERT INTO "User" (login, password) VALUES ($1, $2)`, user.Login, user.Password);
+	encryptedPassword, err := Encrypt([]byte(os.Getenv("SECRET_PASSWORD")), user.Password);
+	if err != nil{
+		return err;
+	}
+	_, err = db.db.Exec(`INSERT INTO "user" (email, password) VALUES ($1, $2)`, user.Email, encryptedPassword);
 	return err; 
 }
 
 func (db *Database) GetUserWithId(params int) (*dto.UserGetDto, error){
 	var user dto.UserGetDto
-	err := db.db.Get(&user, `SELECT user_id, login FROM "User" WHERE user_id = $1`, params);
+	err := db.db.Get(&user, `SELECT id, email FROM "user" WHERE id = $1`, params);
 	return &user, err; 
 }
 
 func (db *Database) GetUsers() (*[]dto.UserGetDto, error){
 	users := []dto.UserGetDto{}
-	err := db.db.Select(&users, `SELECT user_id, login FROM "User"`);
-	fmt.Println(users[0].Login);
+	err := db.db.Select(&users, `SELECT id, email FROM "user"`);
 	return &users, err; 
 }
 
 func (db *Database) PutUser(userParams models.UserData) error{
-	_, err := db.db.Exec(`UPDATE "User" SET login = $1, password = $2 WHERE user_id = $3`, userParams.Login, userParams.Password, userParams.User_id);
+	_, err := db.db.Exec(`UPDATE "user" SET email = $1, password = $2 WHERE id = $3`, userParams.Email, userParams.Password, userParams.ID);
 	return err; 
 }
 
 func (db *Database) DeleteUser(param int) error{
-	_, err := db.db.Exec(`DELETE FROM "User" WHERE user_id = $1`, param);
+	_, err := db.db.Exec(`DELETE FROM "user" WHERE id = $1`, param);
 	return err; 
 }
 
-func (db *Database) LoginUser(loginParams dto.UserLoginDto) (bool, error){
+func (db *Database) LoginUser(EmailParams dto.UserLoginDto) (bool, error){
 
 	var result bool = true;
 
-	err := db.db.Get(&loginParams, `SELECT login, password FROM "User" WHERE login=$1 AND password=$2`, loginParams.Login, loginParams.Password)
+	err := db.db.Get(&EmailParams, `SELECT email, password FROM "user" WHERE Email=$1 AND password=$2`, EmailParams.Email, EmailParams.Password)
 
-	if (dto.UserLoginDto{}) == loginParams{
+	if (dto.UserLoginDto{}) == EmailParams{
 		result = false
 	}
 

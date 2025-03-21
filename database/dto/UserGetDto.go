@@ -1,6 +1,6 @@
 package dto
 
 type UserGetDto struct {
-	User_id int    `db:"user_id"`
-	Login   string `db:"login" json:"login"`
+	ID    int    `db:"id"`
+	Email string `db:"email" json:"email"`
 }

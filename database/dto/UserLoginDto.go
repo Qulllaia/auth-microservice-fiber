@@ -1,6 +1,6 @@
 package dto
 
 type UserLoginDto struct {
-	Login    string `db:"login" json:"login"`
+	Email    string `db:"email" json:"email"`
 	Password string `db:"password" json:"password"`
 }

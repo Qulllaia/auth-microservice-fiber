@@ -42,8 +42,8 @@ func (uc *UserController) PostUser(c *fiber.Ctx) error{
 		})
 	}else{
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"ID": user.User_id,
-			"login": user.Login,
+			"ID": user.ID,
+			"login": user.Email,
 		})
 	}
 }
@@ -63,8 +63,8 @@ func (uc *UserController) GetUserWithId(c *fiber.Ctx) error{
 
 	}else{
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"ID": user.User_id,
-			"login": user.Login,
+			"ID": user.ID,
+			"email": user.Email,
 		})
 	}
 
