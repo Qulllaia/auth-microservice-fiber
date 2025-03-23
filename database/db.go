@@ -47,15 +47,26 @@ func (db *Database) DeleteUser(param int) error{
 	return err; 
 }
 
-func (db *Database) LoginUser(EmailParams dto.UserLoginDto) (bool, error){
+func (db *Database) LoginUser(UserParams dto.UserLoginDto) (models.UserData, error){
 
-	var result bool = true;
+	var resultUser models.UserData;
+	
+	var checkUser models.UserData;
 
-	err := db.db.Get(&EmailParams, `SELECT email, password FROM "user" WHERE Email=$1 AND password=$2`, EmailParams.Email, EmailParams.Password)
-
-	if (dto.UserLoginDto{}) == EmailParams{
-		result = false
+	if err := db.db.Get(&checkUser, `SELECT id, email, password FROM "user" WHERE email=$1`, UserParams.Email); err != nil{
+	return resultUser, nil
 	}
 
-	return result, err
+	decryptedPassword, err := Decrypt([]byte(os.Getenv("SECRET_PASSWORD")), checkUser.Password)
+
+	if err != nil{
+		return resultUser, err
+	}
+
+	if decryptedPassword == UserParams.Password {
+		resultUser.ID = checkUser.ID;
+		resultUser.Email = checkUser.Email;
+	}
+
+	return resultUser, err
 }

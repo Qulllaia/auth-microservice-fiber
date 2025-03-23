@@ -5,6 +5,7 @@ import (
 	"main/database/dto"
 	"main/models"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,30 +34,14 @@ func (uc *AuthController) UserRegistration(c *fiber.Ctx) error{
 	
 	if err := uc.db.CreateUser(&user); err != nil{
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Ошибка при регистрации пользователя": err,
+			"User registration error": err,
 		})
 	}
 
-	claims := dto.AuthDto{
-		ID: user.ID, 
-		Email: user.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),      
-			Issuer:    "my-app",                    
-			Subject:   "user-auth",
-			ID:        "unique-id",   
-			Audience:  []string{"client-app"}, 
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(jwtKey)
+	signedToken, err := tokenGenerator(user);
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"Ошибка при создании токена:": err,
+			"The token generation process ended with an error:": err,
 		})
 	}
 
@@ -67,7 +52,8 @@ func (uc *AuthController) UserRegistration(c *fiber.Ctx) error{
 
 func (uc *AuthController) UserLogin(c *fiber.Ctx) error{
 
-	var loginData dto.UserLoginDto
+	var loginData dto.UserLoginDto;
+	var resultUser models.UserData;
 
 	if err := c.BodyParser(&loginData); err != nil{
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -75,12 +61,38 @@ func (uc *AuthController) UserLogin(c *fiber.Ctx) error{
 		})
 	}
 
-	if result, err := uc.db.LoginUser(loginData); result || err == nil{
+	if resultUser, err := uc.db.LoginUser(loginData); err != nil || resultUser.ID == 0{
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Wrong Credentials",
 		})
-	}else{
-		return c.SendStatus(200);
 	}
 
+	if resultToken, err := tokenGenerator(resultUser); err != nil{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "The token generation process ended with an error",
+			"message": err,
+		});
+	}else{
+		
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"token": resultToken,
+		});
+	}
+
+}
+
+func tokenGenerator(user models.UserData) (string, error){
+	claims := dto.AuthDto{
+		ID: user.ID, 
+		Email: user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),      
+			ID:        strconv.Itoa(user.ID),   
+			Audience:  []string{"client-app"}, 
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims);
+	return token.SignedString(jwtKey);
 }

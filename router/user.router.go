@@ -9,10 +9,11 @@ import (
 )
 
 func SetupUserRoutes(api fiber.Router, db *database.Database){
+	subApi := api.Group("/users")
 	userHandler := controller.UserHandler(db);
-	api.Get("/",  middleware.AuthMiddleware, userHandler.GetUsers)
-	api.Post("/", middleware.AuthMiddleware, userHandler.PostUser)
-	api.Get("/:id", middleware.AuthMiddleware, userHandler.GetUserWithId)
-	api.Put("/", middleware.AuthMiddleware, userHandler.PutUser)
-	api.Delete("/:id", middleware.AuthMiddleware, userHandler.DeleteUser)
+	subApi.Get("/",  middleware.AuthMiddleware, userHandler.GetUsers)
+	subApi.Post("/", middleware.AuthMiddleware, userHandler.PostUser)
+	subApi.Get("/:id", middleware.AuthMiddleware, userHandler.GetUserWithId)
+	subApi.Put("/", middleware.AuthMiddleware, userHandler.PutUser)
+	subApi.Delete("/:id", middleware.AuthMiddleware, userHandler.DeleteUser)
 }

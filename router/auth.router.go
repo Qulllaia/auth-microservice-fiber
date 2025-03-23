@@ -8,7 +8,8 @@ import (
 )
 
 func SetupAuthRoutes(api fiber.Router, db *database.Database){
+	subApi := api.Group("/auth")
 	authHandler := controller.AuthHandler(db);
-	api.Get("/login", authHandler.UserLogin)
-	api.Post("/reg", authHandler.UserRegistration)
+	subApi.Get("/login", authHandler.UserLogin)
+	subApi.Post("/reg", authHandler.UserRegistration)
 }
