@@ -9,9 +9,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"main/gRPC"
 )
 
+
 func main() {
+
+	gRPC.InitGRPC();
 
 	var connectionString string = config.CreateConnectionString(); 
 	db, err := sqlx.Connect("postgres", connectionString);
